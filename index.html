@@ -1,77 +1,17 @@
-const player = document.getElementById('player');
-const gameContainer = document.getElementById('gameContainer');
-const scoreDisplay = document.getElementById('score');
-const timerDisplay = document.getElementById('timer');
-
-let score = 0;
-let currentNumber = 1;
-let intervalId;
-let timer = 0;
-
-const totalPoints = 100;
-
-// Mueve la bola con el puntero del mouse
-document.addEventListener('mousemove', (e) => {
-    const rect = gameContainer.getBoundingClientRect();
-    let x = e.clientX - rect.left - player.clientWidth / 2;
-    let y = e.clientY - rect.top - player.clientHeight / 2;
-
-    x = Math.max(Math.min(x, gameContainer.clientWidth - player.clientWidth), 0);
-    y = Math.max(Math.min(y, gameContainer.clientHeight - player.clientHeight), 0);
-
-    player.style.left = `${x}px`;
-    player.style.top = `${y}px`;
-});
-
-// Genera todos los números del 1 al 100 en la pantalla
-function createNumbers() {
-    for (let num = 1; num <= totalPoints; num++) {
-        const number = document.createElement('div');
-        number.classList.add('number');
-        number.textContent = num;
-
-        const size = 30;
-        number.style.width = `${size}px`;
-        number.style.height = `${size}px`;
-        number.style.top = `${Math.random() * (gameContainer.clientHeight - size)}px`;
-        number.style.left = `${Math.random() * (gameContainer.clientWidth - size)}px`;
-
-        number.dataset.number = num; // Añade un atributo de datos para el número
-
-        gameContainer.appendChild(number);
-    }
-}
-
-// Verifica si el jugador está sobre un número
-function checkCollision() {
-    const numbers = document.querySelectorAll('.number');
-    numbers.forEach(number => {
-        const rect = number.getBoundingClientRect();
-        const playerRect = player.getBoundingClientRect();
-
-        if (!(playerRect.right < rect.left || 
-              playerRect.left > rect.right || 
-              playerRect.bottom < rect.top || 
-              playerRect.top > rect.bottom)) {
-            // El jugador ha tocado el número
-            const num = parseInt(number.dataset.number);
-            if (num === currentNumber) {
-                score += 1;
-                scoreDisplay.textContent = `Puntuación: ${score}`;
-                currentNumber += 1;
-                gameContainer.removeChild(number);
-
-                if (score >= totalPoints) {
-                    endGame('WIN');
-                }
-            } else {
-                endGame('PERDIDO');
-            }
-        }
-    });
-}
-
-// Actualiza el temporizador
-function updateTimer() {
-    timer += 1;
-    timerDisplay.textContent = `Tiempo: 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Números</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="player"></div>
+        <div id="score">Puntuación: 0</div>
+        <div id="timer">Tiempo: 0</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
