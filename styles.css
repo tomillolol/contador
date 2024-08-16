@@ -21,7 +21,7 @@ body {
     position: absolute;
     width: 40px;
     height: 40px;
-    background-color: #000; /* Bola negra */
+    background-color: #000;
     border-radius: 50%;
 }
 
