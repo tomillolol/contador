@@ -7,11 +7,9 @@ let score = 0;
 let currentNumber = 1;
 let intervalId;
 let timer = 0;
-let numberIntervalId;
 
 const totalPoints = 100;
 
-// Mueve la bola con el puntero del mouse
 document.addEventListener('mousemove', (e) => {
     const rect = gameContainer.getBoundingClientRect();
     let x = e.clientX - rect.left - player.clientWidth / 2;
@@ -24,56 +22,65 @@ document.addEventListener('mousemove', (e) => {
     player.style.top = `${y}px`;
 });
 
-// Genera un número en una posición aleatoria
-function createNumber(num) {
-    const number = document.createElement('div');
-    number.classList.add('number');
-    number.textContent = num;
+function createNumbers() {
+    for (let num = 1; num <= totalPoints; num++) {
+        const number = document.createElement('div');
+        number.classList.add('number');
+        number.textContent = num;
 
-    const size = 30;
-    number.style.width = `${size}px`;
-    number.style.height = `${size}px`;
-    number.style.top = `${Math.random() * (gameContainer.clientHeight - size)}px`;
-    number.style.left = `${Math.random() * (gameContainer.clientWidth - size)}px`;
+        const size = 30;
+        number.style.width = `${size}px`;
+        number.style.height = `${size}px`;
+        number.style.top = `${Math.random() * (gameContainer.clientHeight - size)}px`;
+        number.style.left = `${Math.random() * (gameContainer.clientWidth - size)}px`;
 
-    number.addEventListener('click', () => {
-        if (parseInt(number.textContent) === currentNumber) {
-            score += 1;
-            scoreDisplay.textContent = `Puntuación: ${score}`;
-            currentNumber += 1;
-            gameContainer.removeChild(number);
+        number.dataset.number = num;
 
-            if (score >= totalPoints) {
-                endGame('WIN');
-            } else {
-                createNumber(currentNumber);
-            }
-        } else {
-            endGame('PERDIDO');
-        }
-    });
-
-    gameContainer.appendChild(number);
+        gameContainer.appendChild(number);
+    }
 }
 
-// Actualiza el temporizador
+function checkCollision() {
+    const numbers = document.querySelectorAll('.number');
+    numbers.forEach(number => {
+        const rect = number.getBoundingClientRect();
+        const playerRect = player.getBoundingClientRect();
+
+        if (!(playerRect.right < rect.left || 
+              playerRect.left > rect.right || 
+              playerRect.bottom < rect.top || 
+              playerRect.top > rect.bottom)) {
+            const num = parseInt(number.dataset.number);
+            if (num === currentNumber) {
+                score += 1;
+                scoreDisplay.textContent = `Puntuación: ${score}`;
+                currentNumber += 1;
+                gameContainer.removeChild(number);
+
+                if (score >= totalPoints) {
+                    endGame('WIN');
+                }
+            } else {
+                endGame('PERDIDO');
+            }
+        }
+    });
+}
+
 function updateTimer() {
     timer += 1;
     timerDisplay.textContent = `Tiempo: ${timer} segundos`;
 }
 
-// Termina el juego
 function endGame(result) {
     clearInterval(intervalId);
-    clearInterval(numberIntervalId);
     alert(`¡Juego terminado! Resultado: ${result}`);
 }
 
-// Comienza el juego
 function startGame() {
-    createNumber(currentNumber);
+    createNumbers();
     intervalId = setInterval(updateTimer, 1000);
-    numberIntervalId = setInterval(() => createNumber(currentNumber), 2000);
+    setInterval(checkCollision, 50);
 }
 
 startGame();
