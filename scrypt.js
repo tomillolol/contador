@@ -1,56 +1,79 @@
-document.addEventListener('keydown', function(event) {
-    let player = document.getElementById('player');
-    let playerRect = player.getBoundingClientRect();
-    let gameContainer = document.getElementById('gameContainer');
-    let containerRect = gameContainer.getBoundingClientRect();
-    let moveAmount = 5;
+const player = document.getElementById('player');
+const gameContainer = document.getElementById('gameContainer');
+const scoreDisplay = document.getElementById('score');
+const timerDisplay = document.getElementById('timer');
 
-    switch(event.code) {
-        case 'Space':
-            fly();
-            break;
-        case 'KeyW':
-            if (playerRect.top > containerRect.top) {
-                player.style.top = (playerRect.top - moveAmount) + 'px';
-            }
-            break;
-        case 'KeyS':
-            if (playerRect.bottom < containerRect.bottom) {
-                player.style.top = (playerRect.top + moveAmount) + 'px';
-            }
-            break;
-        case 'KeyA':
-            if (playerRect.left > containerRect.left) {
-                player.style.left = (playerRect.left - moveAmount) + 'px';
-            }
-            break;
-        case 'KeyD':
-            if (playerRect.right < containerRect.right) {
-                player.style.left = (playerRect.left + moveAmount) + 'px';
-            }
-            break;
-    }
+let score = 0;
+let currentNumber = 1;
+let intervalId;
+let timer = 0;
+let numberIntervalId;
 
-    function fly() {
-        if (!player.classList.contains('fly')) {
-            player.classList.add('fly');
-            setTimeout(() => player.classList.remove('fly'), 500); // Mantiene el vuelo por 500ms
-        }
-    }
+const totalPoints = 100;
+
+// Mueve la bola con el puntero del mouse
+document.addEventListener('mousemove', (e) => {
+    const rect = gameContainer.getBoundingClientRect();
+    let x = e.clientX - rect.left - player.clientWidth / 2;
+    let y = e.clientY - rect.top - player.clientHeight / 2;
+
+    x = Math.max(Math.min(x, gameContainer.clientWidth - player.clientWidth), 0);
+    y = Math.max(Math.min(y, gameContainer.clientHeight - player.clientHeight), 0);
+
+    player.style.left = `${x}px`;
+    player.style.top = `${y}px`;
 });
 
-let isAlive = setInterval(function() {
-    let player = document.getElementById('player');
-    let building = document.getElementById('building');
+// Genera un número en una posición aleatoria
+function createNumber(num) {
+    const number = document.createElement('div');
+    number.classList.add('number');
+    number.textContent = num;
 
-    let playerRect = player.getBoundingClientRect();
-    let buildingRect = building.getBoundingClientRect();
+    const size = 30;
+    number.style.width = `${size}px`;
+    number.style.height = `${size}px`;
+    number.style.top = `${Math.random() * (gameContainer.clientHeight - size)}px`;
+    number.style.left = `${Math.random() * (gameContainer.clientWidth - size)}px`;
 
-    if (buildingRect.right > playerRect.left &&
-        buildingRect.left < playerRect.right &&
-        buildingRect.bottom > playerRect.top &&
-        buildingRect.top < playerRect.bottom) {
-        alert('¡Te chocaste con el edificio!');
-        // Aquí podrías agregar lógica para reiniciar el juego o detenerlo.
-    }
-}, 10);
+    number.addEventListener('click', () => {
+        if (parseInt(number.textContent) === currentNumber) {
+            score += 1;
+            scoreDisplay.textContent = `Puntuación: ${score}`;
+            currentNumber += 1;
+            gameContainer.removeChild(number);
+
+            if (score >= totalPoints) {
+                endGame('WIN');
+            } else {
+                createNumber(currentNumber);
+            }
+        } else {
+            endGame('PERDIDO');
+        }
+    });
+
+    gameContainer.appendChild(number);
+}
+
+// Actualiza el temporizador
+function updateTimer() {
+    timer += 1;
+    timerDisplay.textContent = `Tiempo: ${timer} segundos`;
+}
+
+// Termina el juego
+function endGame(result) {
+    clearInterval(intervalId);
+    clearInterval(numberIntervalId);
+    alert(`¡Juego terminado! Resultado: ${result}`);
+}
+
+// Comienza el juego
+function startGame() {
+    createNumber(currentNumber);
+    intervalId = setInterval(updateTimer, 1000);
+    numberIntervalId = setInterval(() => createNumber(currentNumber), 2000);
+}
+
+startGame();
